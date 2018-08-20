@@ -7,6 +7,7 @@
     <title>Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap-theme.css">
 </head>
 <body>
 <%
@@ -25,7 +26,7 @@
         <div><input type="text" name="author" placeholder="author" value="<%= book.getAuthor()%>"></div>
         <div><input type="text" name="press" placeholder="press" value="<%= book.getPress()%>"></div>
         <div><input type="hidden" name="Id" value="<%= book.getId()%>"></div>
-        <div><input type="submit" value="提交更新" class="submit"></div>
+        <div><input type="submit" value="提交更新" class=""></div>
 </form>
     <button class="btn" onclick="javascript:history.back(-1);">返回</button>
 </div>

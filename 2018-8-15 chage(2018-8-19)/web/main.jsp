@@ -11,6 +11,7 @@
     <title>Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="bootstrap-3.3.7-dist/css/bootstrap-theme.css">
 </head>
 <body>
 <div class="navbar navbar-inverse navbar-fixed-top">
@@ -18,7 +19,7 @@
 <div class="container-fluid" style="margin-top: 100px;">
     <div class="row-fluid">
         <div style="width:800px;float: left;margin-left: 100px;">
-            <iframe src="index.jsp" width="100%" height="600px" scrolling="no"></iframe>
+            <embed src="index.jsp" width="100%" height="600px" > </embed>
         </div>
         <div class="col-lg-offset-10 ">
             <div class="well sidebar-nav">
