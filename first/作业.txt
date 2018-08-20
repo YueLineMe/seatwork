@@ -1,0 +1,87 @@
+如何让 github 项目免密码同步
+https://blog.csdn.net/wanglei_storage/article/details/53258804
+emmet 工具的基本使用，总结、
+https://www.cnblogs.com/jesse131/p/4978966.html
+markdown 语法的基本总结
+https://blog.csdn.net/u012195214/article/details/54896598
+viewport 的基本原理以及使用
+https://blog.csdn.net/zhouziyu2011/article/details/60570547
+
+@WebServlet配置servlet
+@WebListener配置监听器
+
+Filter（过滤器）主要对请求到达前进行处理，也可以在请求结束后进行处理，类似于链式。一个请求可以被多个过滤器拦截到，会依次进入各个Filter中，放行后直至进入Servlet，Servlet处理请求结束后，回到各个Filter继续执行后面的代码，先执行的Filter后执行完。
+@WebFilter常用属性 ：
+
+asyncSupported
+指定Filter是否支持异步模式
+
+dispatcherTypes
+指定Filter对哪种方式的请求进行过滤。支持的属性：ASYNC、ERROR、FORWARD、INCLUDE、REQUEST；默认过滤所有方式的请求
+
+filterName
+Filter名称
+
+initParams
+配置参数
+
+displayName
+Filter显示名
+
+servletNames
+指定对哪些Servlet进行过滤
+
+urlPatterns/value
+两个属性作用相同，指定拦截的路径
+
+
+
+JSP标准标签库（JSTL）是一个JSP标签集合，它封装了JSP应用的通用核心功能。
+JSTL支持通用的、结构化的任务，比如迭代，条件判断，XML文档操作，国际化标签，SQL标签。 除了这些，它还提供了一个框架来使用集成JSTL的自定义标签。
+<c:out>
+用于在JSP中显示数据，就像<%= ... >
+
+<c:set>
+用于保存数据
+
+<c:remove>
+用于删除数据
+
+<c:catch>
+用来处理产生错误的异常状况，并且将错误信息储存起来
+
+<c:if>
+与我们在一般程序中用的if一样
+
+<c:choose>
+本身只当做<c:when>和<c:otherwise>的父标签
+
+<c:when>
+<c:choose>的子标签，用来判断条件是否成立
+
+<c:otherwise>
+<c:choose>的子标签，接在<c:when>标签后，当<c:when>标签判断为false时被执行
+
+<c:import>
+检索一个绝对或相对 URL，然后将其内容暴露给页面
+
+<c:forEach>
+基础迭代标签，接受多种集合类型
+
+<c:forTokens>
+根据指定的分隔符来分隔内容并迭代输出
+
+<c:param>
+用来给包含或重定向的页面传递参数
+
+<c:redirect>
+重定向至一个新的URL.
+
+<c:url>
+使用可选的查询参数来创造一个URL
+
+
+
+
+
+数学中解耦是指使含有多个变量的数学方程变成能够用单个变量表示的方程组，即变量不再同时共同直接影响一个方程的结果，从而简化分析计算。通过适当的控制量的选取，坐标变换等手段将一个多变量系统化为多个独立的单变量系统的数学模型，即解除各个变量之间的耦合。最常见的有发电机控制，锅炉调节等系统。软件开发中的耦合偏向于两者或多者的彼此影响，解耦就是要解除这种影响，增强各自的独立存在能力，可以无限降低存在的耦合度，但不能根除，否则就失去了彼此的关联，失去了存在意义。
