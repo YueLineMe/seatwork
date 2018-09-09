@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>挖宝网</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/ext.css"/>
+</head>
+<body>
+<div class="container">
+    <div class="row box" style="margin-top: 2rem; margin-bottom: 2rem;">
+        <div class="col-md-3 column">
+            <h1 style="color: red; margin: auto;">挖宝网</h1>
+        </div>
+        <div class="col-md-6 column">
+            <form role="form" class="form-inline">
+                <div class="form-group">
+                    <input type="text" size="60" class="form-control" id="search" placeholder="搜一下"/>
+                    <input type="button" class="btn btn-primary" value="搜索"/>
+                </div>
+
+            </form>
+        </div>
+        <div class="col-md-2 column" align="right">
+            <a id="carthref"><span class="badge pull-right">2</span>我的购物车</a>
+        </div>
+        <div class="col-md-1 column" align="right">
+            <div id="register"><a href="#" id="loginhref">登陆</a>/<a href="#" id="reghref">注册</a></div>
+            <div  id="inregister" style="display: none;"><span style="font-size: 18px; color: silver;"></span><span style="margin-left: 5px;font-size: 10px;color: red;">注销</span></div>
+        </div>
+
+    </div>
+    <!-- 商品列表 -->
+    <div class="row">
+        <div class="col-md-2 column">
+            <ul id="type_ul" class="nav navcolor nav-pills nav-stacked">
+                <li class="active" name="types" data-tid="0">
+                    <a  data>全部</a>
+                </li>
+
+            </ul>
+        </div>
+        <div class="col-md-10 column">
+            <div class="row">
+
+            </div>
+        </div>
+    </div>
+    <!-- 模态框 -->
+    <div id="modal"></div>
+</div>
+</body>
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/operation.js"></script>
+
+<script>
+    //商品信息的创建
+    function create(url){
+        $.post(url,function(data){
+            $(".col-md-10.column .row").empty();
+            for(var i = 0 ;i<data.length;i++){
+                var product=$("<div class=\"col-md-4\">\n" +
+                    "<div class=\"thumbnail\">\n" +
+                    "<img alt=\"300x300\" style='width:300px;height:300px' src=\"img/"+data[i].photo+"\" />\n" +
+                    "<div class=\"caption\">\n" +
+                    "<h3 style=\"color: red; font-weight: bold;\">¥ "+data[i].price+"</h3>\n" +
+                    "<p style='height:40px;'>\n" +
+                    data[i].name+
+                    "</p>\n" +
+                    "<p>\n" +
+                    "<a class=\"btn btn-primary addcart\" data-pid=\""+data[i].pid+"\">加入购物车</a>\n" +
+                    "</p>\n" +
+                    "</div>\n" +
+                    "</div>\n" +
+                    "</div>");
+                $(".col-md-10.column .row").append(product);
+            }
+
+        });
+    }
+    //查询购物车的数量，并更改
+    function selectShopCarcount(){
+        $.post("Myservlet?action=getShopCarcount",function(data){
+            $(".badge.pull-right").text(data.count);
+        });
+    }
+    //判断是否有登录
+    function isRegister(){
+        $.post("Myservlet?action=isRegister",function(data){
+            if(data.code>0){
+                Usersname=data.name;
+                flag=true;
+            }
+            else
+                flag=false;
+        });
+    }
+    var Usersname=null;
+    var flag=false;
+    //数据初始化
+    create("Myservlet?action=selectProduct");
+    selectShopCarcount();
+    isRegister();
+    //数据初始化
+    $(function(){
+        if(flag){
+            $("#register").hide(300);
+            $("#inregister span:first-child").text(Usersname);
+            $("#inregister").show(500);
+            $("#inregister").css("display","block");
+        }
+    })
+    $(document).ajaxError(function(){
+        console.log("系统发生故障，请谅解");
+    })
+    $(function () {
+        //登录
+        $("#loginhref").on("click", function () {
+            $("#modal").load("login.html", function () {
+                $('#loginModal').modal('show');
+                $('.btn.btn-primary').click(function(){
+                    $.post("Myservlet?action=selectUsers",{account:$("#account").val(),pwd:$("#password").val()},function(data){
+                        if(data.code>0){
+                            $(".btn.btn-default").click();
+                            $("#register").hide(300);
+                            $("#inregister span:first-child").text(data.uname);
+                            $("#inregister").show(500);
+                            $("#inregister").css("display","block");
+                            selectShopCarcount();
+                            flag=true;
+                        }else{
+                            $("#password").val("");
+                            $("#account").val("");
+                            alert("账号或密码不正确");
+                        }
+                    });
+                });
+            });
+        });
+        //注册
+        $("#reghref").on("click", function () {
+            $("#modal").load("reg.html", function () {
+                $('#regModal').modal('show');
+                $("#regModal .btn.btn-primary").click(function(){
+                    $.post("Myservlet?action=addUsers",{uname:$("#account").val(),phone:$("#tel").val(),pwd:$("#password").val(),e_mail:$("#email").val()},function(data){
+                        if(data.code>0){
+                            $(".btn.btn-default").click();
+                            $("#register").hide(300);
+                            $("#inregister span:first-child").text(data.uname);
+                            $("#inregister").show(500);
+                            $("#inregister").css("display","block");
+                            flag=true;
+                        }
+                        else{
+                            alert("用户名已注册");
+                            $("#account").val("");
+                            $("#tel").val("");
+                            $("#password").val("");
+                            $("#email").val("");
+                        }
+                    });
+
+
+                })
+            });
+        });
+        //查看类型不同的商品
+        $.post("Myservlet?action=selectType", function (data) {
+            for (var i = 0; i < data.length; i++) {
+                var types=$("<li class=\"nav\" name=\"types\" data-tid=\""+data[i].ptid+"\">\n" +
+                    "<a \">"+data[i].pname+"</a>\n" +
+                    "</li>")
+                $("#type_ul").append(types);
+            }
+        });
+    });
+    $(function () {
+        //注销
+        $(document).on("click","#inregister span:eq(1)",function () {
+            $.post("Myservlet?action=logout",function (data) {
+                var con=confirm("是否注销该用户？")
+                if(!con){
+                    return false;
+                }
+                if(data.code>0){
+                    $("#register").show(300);
+                    $("#inregister span:first-child").text("");
+                    $("#inregister").hide(500);
+                    flag=false;
+                    selectShopCarcount();
+                }else{
+                    alert("注销失败");
+                }
+            })
+        })
+        //左边分类条
+        $(document).on("click","li[name='types']",function(){
+            var tid=$(this).data("tid");
+            var url="Myservlet?action=getProct_bytype&ptid="+tid;
+            if(tid==0){
+                url="Myservlet?action=selectProduct";
+            }
+            create(url);
+        });
+        //添加购物车
+        $(document).on("click",'.btn.btn-primary.addcart',function() {
+            if (flag) {
+                $.post("ShopCarContro?action=addShopCar",{pid:$(this).data("pid")},function(data){
+                    if(data.code>0){
+                        selectShopCarcount();
+                    }else
+                        alert("系统异常，暂时无法添加到购物车");
+                });
+            }else{
+                alert("您还未登录，请先登录，谢谢");
+            }
+
+        });
+        //购物车判断
+        $("#carthref").click(function () {
+            if(flag){
+                location.href="cart.html";
+            }else
+                alert("请先登录");
+        });
+        //搜索框
+        $(".form-group .btn.btn-primary").click(function(){
+            var url="Myservlet?action=getProct_byname&name="+$("#search").val();
+            create(url);
+            $("#search").val("");
+        });
+    });
+
+</script>
+</html>

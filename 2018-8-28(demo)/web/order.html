@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>确认订单</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/ext.css" />
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="row box" style="margin-bottom: 2rem; margin-top: 2rem;">
+				<div class="col-md-10 column">
+					<h1 style="color: red; margin: auto;">确认订单</h1>
+				</div>
+				<div class="col-md-2 column" align="right">
+					<a href="index.html">返回首页</a>
+				</div>
+			</div>
+			<!-- 地址信息-->
+			<div class="row" style="margin-bottom: 2rem;">
+				<div class="col-md-12 column">
+					<ul id="siteul" class="nav navcolor nav-pills nav-stacked">
+						<!-- 地址信息-->
+					</ul>
+				</div>
+			</div>
+			<!-- 订单信息 -->
+			<div class="row" style="margin-bottom: 2rem;">
+				<div class="col-md-12 column">
+					<ul id="orderul" class="nav navcolor nav-pills nav-stacked">
+						<!-- 订单信息 -->
+					</ul>
+				</div>
+			</div>
+			<!-- 结算 -->
+			<div class="row">
+				<div class="col-md-12 column" align="right" style="margin-top: 1rem;">
+					<p id="sumprice" style="color: red; font-size: large; font-weight: bold;">实付款：¥ 0.00</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 column" align="right">
+					<input type="button" id="suborder" class="btn btn-primary btn-lg" value="提交订单" />
+				</div>
+			</div>
+		</div>
+		<!-- 模式对话框 -->
+		<div id="addrModal"></div>
+	</body>
+	<script src="js/jquery-3.3.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script>
+		//创建地址
+        function createSite(){
+            $.post("OrderContro?action=getSite",function (data) {
+                $("#siteul").empty();
+                $("#siteul").append($("<li class=\"active\" style=\"font-size: large;\">\n" +
+                    "\t\t\t\t\t\t\t<a href=\"#\">配送地址</a>\n" +
+                    "\t\t\t\t\t\t</li>"));
+                for(var i=0;i<data.length;i++){
+                    var html="";
+                    if(i==data.length-1)
+                        html="checked";
+                    var li=$("<li style='height: 30px;line-height: 30px;'><div>\n" +
+                        "\t\t\t\t\t\t\t<input data-sid='"+data[i].sid+"' "+html+" type=\"radio\" name=\"address\"/>&nbsp;"+data[i].locatoin+"("+data[i].recipients+" 收) "+data[i].phone+"\n" +
+                        "\t\t\t\t\t\t<div id='delsite' data-sid='"+data[i].sid+"' class='btn btn-danger btn-sm' style='float:right'>删除</div>" +
+						"</div></li>");
+                    $("#siteul").append(li);
+                }
+                $("#siteul").append($("<li>\n" +
+                    "\t\t\t\t\t\t\t<input type=\"button\" id=\"newaddr\" class=\"btn btn-info btn-sm\" value=\"使用新地址\"/>\n" +
+                    "\t\t\t\t\t\t</li>"));
+            })
+        }
+        $(document).ajaxError(function(){
+            console.log("系统发生故障，请谅解");
+        })
+		$(function(){
+		    //创建商品
+		    $.post("OrderContro?action=getOrder",function (data) {
+				var firstchild= $("<div class=\"row\">\n" +
+                    "\t\t\t\t\t\t\t\t<div class=\"col-md-1 column\" align=\"left\"></div>\n" +
+                    "\t\t\t\t\t\t\t\t<div class=\"col-md-3 column\" align=\"left\">商品信息</div>\n" +
+                    "\t\t\t\t\t\t\t\t<div class=\"col-md-3 column\" align=\"left\">单价</div>\n" +
+                    "\t\t\t\t\t\t\t\t<div class=\"col-md-2 column\" align=\"left\">数量</div>\n" +
+                    "\t\t\t\t\t\t\t\t<div class=\"col-md-3 column\" align=\"left\">金额</div>\n" +
+                    "\t\t\t\t\t\t\t</div>");
+                $("#orderul").append($("" +
+					"<li class=\"active\" id=\"StartOrder\" style=\"font-size: large;\">\n" +
+                    "\t\t\t\t\t\t\t<a>订单信息</a>\n" +
+                    "\t\t\t\t\t\t</li>"));
+                var sumprice=0;
+				for(var i=0;i<data.length;i++){
+				    sumprice+=data[i].sumprice;
+					var li=$("<li></li>");
+				    if(i==0)
+				        li.append(firstchild);
+					var child=$("<div class=\"row box\">\n" +
+						"\t\t\t\t\t\t\t\t<div class=\"col-md-1 column\" align=\"left\">\n" +
+						"\t\t\t\t\t\t\t\t\t<img alt=\"60x60\" style=\"margin: 1rem;\" width=\"60rem\" height=\"60rem\" src=\"img/"+data[i].photo+"\" />\n" +
+						"\t\t\t\t\t\t\t\t</div>\n" +
+						"\t\t\t\t\t\t\t\t<div class=\"col-md-3 column\" align=\"left\">\n" +
+						"\t\t\t\t\t\t\t\t\t<p>\n" +
+						data[i].name +
+						"\t\t\t\t\t\t\t\t\t</p>\n" +
+						"\t\t\t\t\t\t\t\t</div>\n" +
+						"\t\t\t\t\t\t\t\t<div class=\"col-md-3 column\" align=\"left\">\n" +
+						"\t\t\t\t\t\t\t\t\t<p style=\"font-size: large;\">"+data[i].price+"</p>\n" +
+						"\t\t\t\t\t\t\t\t</div>\n" +
+						"\t\t\t\t\t\t\t\t<div class=\"col-md-2 column\" align=\"left\">\n" +
+						"\t\t\t\t\t\t\t\t\t<p style=\"font-size: large;\">"+data[i].scount+"</p>\n" +
+						"\t\t\t\t\t\t\t\t</div>\n" +
+						"\t\t\t\t\t\t\t\t<div class=\"col-md-3 column\" align=\"left\">\n" +
+						"\t\t\t\t\t\t\t\t\t<p style=\"color: red; font-size: large;\">¥ "+data[i].sumprice+"</p>\n" +
+						"\t\t\t\t\t\t\t\t</div>\n" +
+						"\t\t\t\t\t\t\t</div>");
+					li.append(child);
+					$("#orderul").append(li);
+				}
+				$("#sumprice").text("实付款：¥ "+sumprice);
+            });
+		    createSite();
+		});
+		$(function(){
+		    //添加新地址
+			$(document).on("click","#newaddr",function(){
+				$("#addrModal").load("newaddr.html",function(){
+					$("#newAddrModal").modal('show');
+					$(".btn.btn-primary").click(function () {
+						$.post("OrderContro?action=addSite",{recipients:$("#receiveUser").val(),phone:$("#receiveTell").val(),locatoin:$("#receiveAddr").val()},function (data) {
+							if(data.code>0){
+							    $(".btn.btn-default.first").click();
+							    createSite();
+							}else{
+							    alert("添加失败");
+							}
+                        })
+                    });
+				});
+			});
+			//删除地址
+			$(document).on("click","#delsite",function(){
+                var con=confirm("是否删除该地址?")
+                if(!con){
+                    return false;
+                }
+			    $.post("OrderContro?action=delsite",{sid:$(this).data("sid")},function (data) {
+			        if(data.code>0){
+			            alert("删除成功");
+                        createSite();
+					}
+					else
+                        alert("删除失败");
+                });
+			    console.log($(this).data("sid"));
+			});
+			//提交订单
+			$("#suborder").on("click",function(){
+			    var sid=0;
+			    $("input[name=address]").each(function (index,obj) {
+					if($(obj).prop("checked"))
+					    sid=$(obj).data("sid");
+                });
+                var con=confirm("是否购买这些商品?")
+                if(!con){
+                    return false;
+                }
+				$.post("OrderContro?action=balance",{sid:sid,sumprice:$("#sumprice").text().substring(6)},function (data) {
+					if(data.code>0){
+					    alert("购买成功");
+					    location.href="index.html";
+					}else{
+					    alert("购买失败");
+					}
+                });
+			});
+		});
+	</script>
+</html>

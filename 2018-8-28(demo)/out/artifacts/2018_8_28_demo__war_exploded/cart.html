@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>购物车</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/ext.css"/>
+	</head>
+	<body>
+	<div class="container">
+	<div class="row box" style="margin-bottom: 2rem; margin-top: 2rem;">
+		<div class="col-md-10 column">
+			<h1 style="color: red; margin: auto;">我的购物车</h1>
+		</div>
+		<div class="col-md-2 column" align="right">
+			<a href="index.html">返回首页</a>
+		</div>
+	</div>
+	<div id="top" class="row well well-sm">
+		<div class="col-md-2 column" align="left">
+			<input class="checkall" type="checkbox"/>&nbsp;全选
+		</div>
+		<div class="col-md-3 column" align="left">商品信息</div>
+		<div class="col-md-2 column" align="left">单价</div>
+		<div class="col-md-2 column" align="left">数量</div>
+		<div class="col-md-2 column" align="left">金额</div>
+		<div class="col-md-1 column" align="left">操作</div>
+	</div>
+	<!-- 购物车列表 -->
+
+	<!-- 结算 -->
+	<div class="row well well-sm">
+		<div class="col-md-12 column" align="right" style="margin-top: 1rem;">
+			<p id="sumprice" style="color: red; font-size: large; font-weight: bold;">合计：¥ 0.00</p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 column" align="right">
+			<input type="button" class="btn btn-primary btn-lg" value="结算"/>
+		</div>
+	</div>
+	</div>
+	</body>
+	<script src="js/operation.js"></script>
+	<script src="js/jquery-3.3.1.min.js"></script>
+	<script>
+        $(document).ajaxError(function(){
+            console.log("系统发生故障，请谅解");
+        })
+		//数据初始化
+		$(function(){
+		    $.post("ShopCarContro?action=getAll",function(data){
+		        for(var i=0;i<data.length;i++){
+		            var html=$("<div class=\"row well well-sm box\">\n" +
+                        "\t<div class=\"col-md-2 column first\" align=\"left\">\n" +
+                        "\t\t<input type=\"checkbox\" data-sid='"+data[i].sid+"'/>\n" +
+                        "\t\t<img alt=\"120x120\" width=\"120rem\" height=\"120rem\" src=\"img/"+data[i].photo+"\" />\n" +
+                        "\t</div>\n" +
+                        "\t<div class=\"col-md-3 column\" align=\"left\">\n" +
+                        "\t\t<p>\n" +
+                        data[i].name+
+                        "\t\t</p>\n" +
+                        "\t</div>\n" +
+                        "\t<div class=\"col-md-2 column\" align=\"left\">\n" +
+                        "\t\t<p style=\"font-size: large;\">¥ "+data[i].price+"</p>\n" +
+                        "\t</div>\n" +
+                        "\t<div class=\"col-md-2 column\" align=\"left\">\n" +
+                        "\t\t<input type=\"number\" name=\"buyNum\" data-sid='"+data[i].sid+"'  value=\""+data[i].scount+"\"/>\n" +
+                        "\t</div>\n" +
+                        "\t<div class=\"col-md-2 column\" align=\"left\">\n" +
+                        "\t\t<p class='sumprice' style=\"color: red; font-size: large;\">¥ "+data[i].sumprice+"</p>\n" +
+                        "\t</div>\n" +
+                        "\t<div class=\"col-md-1 column\" align=\"left\">\n" +
+                        "\t\t<input type=\"button\" class=\"btn btn-danger\" data-sid='"+data[i].sid+"' name=\"del\" value=\"删除\"/>\n" +
+                        "\t</div>\n" +
+                        "</div>");
+		            $("#top").after(html);
+				}
+			});
+		});
+        //各式点击事件
+        $(function(){
+            //删除商品
+            $(document).on("click",".btn.btn-danger",function(){
+                var ys=$(this);
+                var con=confirm("是否删除商品？")
+                if(!con){
+                    return false;
+                }
+                $.post("ShopCarContro?action=del",{sid:$(this).data("sid")},function(data){
+                    if(data.code>0){
+                        ys.parent().parent().remove();
+                        alert("删除成功");
+                        calculate();
+                    }
+                    else{
+                        alert("删除失败");
+                    }
+                })
+            })
+			//更改数量时触发的价格变动
+            $(document).on("input propertychange","input[name='buyNum']",function(){
+                var prior=$(this).parent().prev().children().first().text().substring(2);
+                var next=$(this).parent().next().children().first();
+                var count=$(this);
+                var check=$(this).parent().parent().children("div").children("input[type=checkbox]").prop("checked");
+                $.post("ShopCarContro?action=updatecount",{count:$(this).val(),sid:$(this).data("sid"),sumprice:accMul(prior,count.val())},function(data){
+                    if(data.code>0){
+                        next.text("￥ "+accMul(prior,count.val()));
+                        calculate();
+                    }
+                })
+            });
+            //全选点击
+            $(document).on("click",".checkall",function () {
+				$(".row.well.well-sm.box input[type='checkbox']").prop("checked",$(this).prop("checked"));
+                calculate();
+            });
+            //checkbox 的点击
+            $(document).on("click",".row.well.well-sm.box input[type='checkbox']",function(){
+                calculate();
+                var ischeck=false;
+                $(".row.well.well-sm.box input[type='checkbox']").each(function (index,obj) {
+					if(index==0)
+						ischeck=$(obj).prop("checked");
+					if($(obj).prop("checked")!=ischeck){
+                        $(".checkall").prop("checked",false);
+                        return false;
+					}
+					if(index==$(".row.well.well-sm.box input[type='checkbox']").length-1)
+                    	$(".checkall").prop("checked",ischeck);
+                });
+            });
+        });
+        $(function(){
+            //结算ing
+            $(".btn.btn-primary.btn-lg").click(function(){
+                var sids=new Array();
+                $(".col-md-2.column.first").each(function(index,obj){
+					if($(obj).children().prop("checked"))
+                    	sids.push($(obj).children().data("sid"));
+				});
+                console.log(sids.length);
+                if(sids.length>0){
+					$.ajax({
+						url:"ShopCarContro?action=goOrders",
+						data:{
+							sids:sids,
+							sumprice:parseInt($("#sumprice").text().substring(5))
+						},
+						traditional:true,
+						success:function(data){
+							if(data.code>0){
+								location.href='order.html';
+							}
+							else{
+								alert("系统出现故障，请重新尝试");
+							}
+						}
+					});
+                }else
+                    alert("请选择商品");
+			});
+        });
+
+        //计算总价格
+        function calculate(){
+            var sumprice=0;
+            $(".col-md-2.column.first :first-child").each(function (index,obj) {
+				if($(obj).prop("checked")){
+                    var price=parseInt($(obj).parent().next().next().next().next().children(".sumprice").text().substring(2));
+                    sumprice=accAdd(sumprice,price);
+				}
+            });
+            $("#sumprice").text("合计：¥ "+sumprice);
+		}
+	</script>
+</html>
